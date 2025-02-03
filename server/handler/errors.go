@@ -18,16 +18,21 @@ type errorResponse struct {
 	StatusCode int    `json:"statusCode"`
 }
 
-func HandleError(w http.ResponseWriter, err error, statusCode int, shouldLog bool) {
+func HandleError(w http.ResponseWriter, handlerErr error, statusCode int, shouldLog bool) {
 	if shouldLog {
-		slog.Error(fmt.Sprintf("Handler error: %v", err), "status", statusCode)
+		slog.Error(fmt.Sprintf("Handler error: %v", handlerErr), "status", statusCode)
 	}
 
 	w.Header().Add("Content-Type", "application/json")
 	w.WriteHeader(statusCode)
 
-	err = json.NewEncoder(w).Encode(errorResponse{
-		Error:      fmt.Sprintf("%s: %d", http.StatusText(statusCode), statusCode),
+	// Hide server errors from the client
+	if statusCode >= 500 {
+		handlerErr = fmt.Errorf("%s: %d", http.StatusText(statusCode), statusCode)
+	}
+
+	err := json.NewEncoder(w).Encode(errorResponse{
+		Error:      handlerErr.Error(),
 		StatusCode: statusCode,
 	})
 	handleWritingErr(err)
