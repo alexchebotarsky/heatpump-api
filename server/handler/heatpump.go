@@ -37,13 +37,19 @@ func UpdateHeatpumpState(StateUpdater StateUpdater) http.HandlerFunc {
 		var state heatpump.State
 		err := json.NewDecoder(r.Body).Decode(&state)
 		if err != nil {
-			HandleError(w, fmt.Errorf("error decoding heatpump state from POST body: %v", err), http.StatusBadRequest, false)
+			HandleError(w, fmt.Errorf("error decoding POST body: %v", err), http.StatusBadRequest, false)
+			return
+		}
+
+		err = state.Validate()
+		if err != nil {
+			HandleError(w, fmt.Errorf("error validating POST body: %v", err), http.StatusBadRequest, false)
 			return
 		}
 
 		updatedState, err := StateUpdater.UpdateState(state)
 		if err != nil {
-			HandleError(w, fmt.Errorf("error updating state: %v", err), http.StatusInternalServerError, true)
+			HandleError(w, fmt.Errorf("error updating heatpump state: %v", err), http.StatusInternalServerError, true)
 			return
 		}
 
