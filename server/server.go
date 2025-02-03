@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/alexchebotarsky/heatpump-api/server/handler"
 	chi "github.com/go-chi/chi/v5"
 )
 
@@ -19,6 +20,12 @@ type Server struct {
 }
 
 type Clients struct {
+	Database Database
+}
+
+type Database interface {
+	handler.StateFetcher
+	handler.StateUpdater
 }
 
 func New(host string, port uint16, clients Clients) *Server {

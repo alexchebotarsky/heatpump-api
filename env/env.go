@@ -15,6 +15,12 @@ type Config struct {
 
 	Host string `env:"HOST,default=0.0.0.0"`
 	Port uint16 `env:"PORT,default=8000"`
+
+	DatabaseFilename string `env:"DATABASE_FILENAME,default=./database.json"`
+
+	DefaultMode              string `env:"DEFAULT_MODE,default=OFF"`
+	DefaultTargetTemperature int    `env:"DEFAULT_TARGET_TEMPERATURE,default=22"`
+	DefaultFanSpeed          int    `env:"DEFAULT_FAN_SPEED,default=0"`
 }
 
 func LoadConfig(ctx context.Context) (*Config, error) {

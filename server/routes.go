@@ -14,7 +14,8 @@ func (s *Server) setupRoutes() {
 	s.Router.Route(v1API, func(r chi.Router) {
 		r.Use(middleware.Metrics)
 
-		r.Get("/hello-world", handler.HelloWorld)
+		r.Get("/state", handler.GetHeatpumpState(s.Clients.Database))
+		r.Post("/state", handler.UpdateHeatpumpState(s.Clients.Database))
 	})
 }
 

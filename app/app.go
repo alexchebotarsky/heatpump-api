@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/alexchebotarsky/heatpump-api/client"
+	"github.com/alexchebotarsky/heatpump-api/client/database"
 	"github.com/alexchebotarsky/heatpump-api/env"
 	"github.com/alexchebotarsky/heatpump-api/server"
 )
@@ -84,18 +85,30 @@ type Service interface {
 func setupServices(env *env.Config, clients *Clients) ([]Service, error) {
 	var services []Service
 
-	server := server.New(env.Host, env.Port, server.Clients{})
+	server := server.New(env.Host, env.Port, server.Clients{
+		Database: clients.Database,
+	})
 	services = append(services, server)
 
 	return services, nil
 }
 
 type Clients struct {
+	Database *database.Database
 }
 
 func setupClients(env *env.Config) (*Clients, error) {
 	var c Clients
-	var _ error
+	var err error
+
+	c.Database, err = database.New(env.DatabaseFilename, map[string]string{
+		database.ModeKey:              env.DefaultMode,
+		database.TargetTemperatureKey: fmt.Sprintf("%d", env.DefaultTargetTemperature),
+		database.FanSpeedKey:          fmt.Sprintf("%d", env.DefaultFanSpeed),
+	})
+	if err != nil {
+		return nil, fmt.Errorf("error creating new database client: %v", err)
+	}
 
 	return &c, nil
 }
