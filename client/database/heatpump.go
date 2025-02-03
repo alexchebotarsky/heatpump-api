@@ -54,11 +54,16 @@ func (d *Database) UpdateState(state heatpump.State) (*heatpump.State, error) {
 	}
 
 	if state.FanSpeed != nil {
-		err := d.Set(FanSpeedKey, fmt.Sprintf("%d", *state.FanSpeed))
+		fanSpeed := snapToNearest(*state.FanSpeed, 20)
+		err := d.Set(FanSpeedKey, fmt.Sprintf("%d", fanSpeed))
 		if err != nil {
 			return nil, fmt.Errorf("error setting %s in database: %v", FanSpeedKey, err)
 		}
 	}
 
 	return d.FetchState()
+}
+
+func snapToNearest(number, snap int) int {
+	return ((number + snap/2) / snap) * snap
 }
