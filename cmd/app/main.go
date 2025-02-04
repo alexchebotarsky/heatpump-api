@@ -28,7 +28,7 @@ func main() {
 		slog.Error(fmt.Sprintf("Error initializing metrics: %v", err))
 	}
 
-	app, err := app.New(env)
+	app, err := app.New(ctx, env)
 	if err != nil {
 		slog.Error(fmt.Sprintf("Error creating app: %v", err))
 		os.Exit(1)

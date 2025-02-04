@@ -21,11 +21,16 @@ type Server struct {
 
 type Clients struct {
 	Database Database
+	PubSub   PubSub
 }
 
 type Database interface {
-	handler.StateFetcher
-	handler.StateUpdater
+	handler.HeatpumpStateFetcher
+	handler.HeatpumpStateUpdater
+}
+
+type PubSub interface {
+	handler.IRTransmitter
 }
 
 func New(host string, port uint16, clients Clients) *Server {

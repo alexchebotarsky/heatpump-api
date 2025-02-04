@@ -19,7 +19,7 @@ func New(filename string, defaults map[string]string) (*Database, error) {
 
 	d.file, err = os.OpenFile(filename, os.O_RDWR|os.O_CREATE, 0644)
 	if err != nil {
-		return nil, fmt.Errorf("Error opening/creating database file %q: %v", filename, err)
+		return nil, fmt.Errorf("error opening/creating database file: %v", err)
 	}
 	d.data = make(map[string]string, len(defaults))
 

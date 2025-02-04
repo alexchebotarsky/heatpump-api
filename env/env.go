@@ -11,9 +11,9 @@ import (
 
 type Config struct {
 	LogLevel  slog.Level `env:"LOG_LEVEL,default=debug"`
-	LogFormat string     `env:"LOG_FORMAT,default=json"`
+	LogFormat string     `env:"LOG_FORMAT,default=text"`
 
-	Host string `env:"HOST,default=0.0.0.0"`
+	Host string `env:"HOST,default=localhost"`
 	Port uint16 `env:"PORT,default=8000"`
 
 	DatabaseFilename string `env:"DATABASE_FILENAME,default=./database.json"`
@@ -21,6 +21,9 @@ type Config struct {
 	DefaultMode              string `env:"DEFAULT_MODE,default=OFF"`
 	DefaultTargetTemperature int    `env:"DEFAULT_TARGET_TEMPERATURE,default=22"`
 	DefaultFanSpeed          int    `env:"DEFAULT_FAN_SPEED,default=0"`
+
+	PubSubHost string `env:"PUBSUB_HOST,default=localhost"`
+	PubSubPort uint16 `env:"PUBSUB_PORT,default=1883"`
 }
 
 func LoadConfig(ctx context.Context) (*Config, error) {

@@ -10,7 +10,9 @@ import (
 
 	"github.com/alexchebotarsky/heatpump-api/client"
 	"github.com/alexchebotarsky/heatpump-api/client/database"
+	"github.com/alexchebotarsky/heatpump-api/client/pubsub"
 	"github.com/alexchebotarsky/heatpump-api/env"
+	"github.com/alexchebotarsky/heatpump-api/processor"
 	"github.com/alexchebotarsky/heatpump-api/server"
 )
 
@@ -19,11 +21,11 @@ type App struct {
 	Clients  *Clients
 }
 
-func New(env *env.Config) (*App, error) {
+func New(ctx context.Context, env *env.Config) (*App, error) {
 	var app App
 	var err error
 
-	app.Clients, err = setupClients(env)
+	app.Clients, err = setupClients(ctx, env)
 	if err != nil {
 		return nil, fmt.Errorf("error setting up clients: %v", err)
 	}
@@ -85,19 +87,27 @@ type Service interface {
 func setupServices(env *env.Config, clients *Clients) ([]Service, error) {
 	var services []Service
 
-	server := server.New(env.Host, env.Port, server.Clients{
+	s := server.New(env.Host, env.Port, server.Clients{
+		Database: clients.Database,
+		PubSub:   clients.PubSub,
+	})
+	services = append(services, s)
+
+	p := processor.New(processor.Clients{
+		PubSub:   clients.PubSub,
 		Database: clients.Database,
 	})
-	services = append(services, server)
+	services = append(services, p)
 
 	return services, nil
 }
 
 type Clients struct {
 	Database *database.Database
+	PubSub   *pubsub.PubSub
 }
 
-func setupClients(env *env.Config) (*Clients, error) {
+func setupClients(ctx context.Context, env *env.Config) (*Clients, error) {
 	var c Clients
 	var err error
 
@@ -108,6 +118,11 @@ func setupClients(env *env.Config) (*Clients, error) {
 	})
 	if err != nil {
 		return nil, fmt.Errorf("error creating new database client: %v", err)
+	}
+
+	c.PubSub, err = pubsub.New(ctx, env.PubSubHost, env.PubSubPort)
+	if err != nil {
+		return nil, fmt.Errorf("error creating new pubsub client: %v", err)
 	}
 
 	return &c, nil

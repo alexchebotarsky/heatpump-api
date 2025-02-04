@@ -7,12 +7,14 @@ import (
 )
 
 const (
-	ModeKey              = "mode"
-	TargetTemperatureKey = "targetTemperature"
-	FanSpeedKey          = "fanSpeed"
+	ModeKey               = "mode"
+	TargetTemperatureKey  = "targetTemperature"
+	FanSpeedKey           = "fanSpeed"
+	CurrentTemperatureKey = "currentTemperature"
+	CurrentHumidityKey    = "currentHumidity"
 )
 
-func (d *Database) FetchState() (*heatpump.State, error) {
+func (d *Database) FetchHeatpumpState() (*heatpump.State, error) {
 	var s heatpump.State
 	var err error
 
@@ -38,7 +40,7 @@ func (d *Database) FetchState() (*heatpump.State, error) {
 	return &s, nil
 }
 
-func (d *Database) UpdateState(state heatpump.State) (*heatpump.State, error) {
+func (d *Database) UpdateHeatpumpState(state *heatpump.State) (*heatpump.State, error) {
 	if state.Mode != nil {
 		err := d.Set(ModeKey, string(*state.Mode))
 		if err != nil {
@@ -61,7 +63,21 @@ func (d *Database) UpdateState(state heatpump.State) (*heatpump.State, error) {
 		}
 	}
 
-	return d.FetchState()
+	return d.FetchHeatpumpState()
+}
+
+func (d *Database) UpdateTemperatureAndHumidity(temperature float64, humidity float64) error {
+	err := d.Set(CurrentTemperatureKey, fmt.Sprintf("%.1f", temperature))
+	if err != nil {
+		return fmt.Errorf("error setting %s in database: %v", CurrentTemperatureKey, err)
+	}
+
+	err = d.Set(CurrentHumidityKey, fmt.Sprintf("%.1f", humidity))
+	if err != nil {
+		return fmt.Errorf("error setting %s in database: %v", CurrentHumidityKey, err)
+	}
+
+	return nil
 }
 
 func snapToNearest(number, snap int) int {
