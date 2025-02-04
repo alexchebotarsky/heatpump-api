@@ -40,6 +40,11 @@ func New(filename string, defaults map[string]string) (*Database, error) {
 		return nil, fmt.Errorf("error updating database file: %v", err)
 	}
 
+	err = d.prepareHeatpumpStatements()
+	if err != nil {
+		return nil, fmt.Errorf("error preparing heatpump statements: %v", err)
+	}
+
 	return &d, nil
 }
 

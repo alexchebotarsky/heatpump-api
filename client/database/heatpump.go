@@ -3,7 +3,8 @@ package database
 import (
 	"fmt"
 
-	"github.com/alexchebotarsky/heatpump-api/heatpump"
+	"github.com/alexchebotarsky/heatpump-api/metrics"
+	"github.com/alexchebotarsky/heatpump-api/model/heatpump"
 )
 
 const (
@@ -13,6 +14,28 @@ const (
 	CurrentTemperatureKey = "currentTemperature"
 	CurrentHumidityKey    = "currentHumidity"
 )
+
+func (d *Database) prepareHeatpumpStatements() error {
+	mode, err := d.GetStr(ModeKey)
+	if err != nil {
+		return fmt.Errorf("error getting initial %s from database: %v", ModeKey, err)
+	}
+	metrics.SetHeatpumpMode(heatpump.Mode(mode))
+
+	targetTemperature, err := d.GetInt(TargetTemperatureKey)
+	if err != nil {
+		return fmt.Errorf("error getting initial %s from database: %v", TargetTemperatureKey, err)
+	}
+	metrics.SetHeatpumpTargetTemperature(targetTemperature)
+
+	fanSpeed, err := d.GetInt(FanSpeedKey)
+	if err != nil {
+		return fmt.Errorf("error getting initial %s from database: %v", FanSpeedKey, err)
+	}
+	metrics.SetHeatpumpFanSpeed(fanSpeed)
+
+	return nil
+}
 
 func (d *Database) FetchHeatpumpState() (*heatpump.State, error) {
 	var s heatpump.State
@@ -42,17 +65,21 @@ func (d *Database) FetchHeatpumpState() (*heatpump.State, error) {
 
 func (d *Database) UpdateHeatpumpState(state *heatpump.State) (*heatpump.State, error) {
 	if state.Mode != nil {
-		err := d.Set(ModeKey, string(*state.Mode))
+		mode := *state.Mode
+		err := d.Set(ModeKey, string(mode))
 		if err != nil {
 			return nil, fmt.Errorf("error setting %s in database: %v", ModeKey, err)
 		}
+		metrics.SetHeatpumpMode(mode)
 	}
 
 	if state.TargetTemperature != nil {
-		err := d.Set(TargetTemperatureKey, fmt.Sprintf("%d", *state.TargetTemperature))
+		temperature := *state.TargetTemperature
+		err := d.Set(TargetTemperatureKey, fmt.Sprintf("%d", temperature))
 		if err != nil {
 			return nil, fmt.Errorf("error setting %s in database: %v", TargetTemperatureKey, err)
 		}
+		metrics.SetHeatpumpTargetTemperature(temperature)
 	}
 
 	if state.FanSpeed != nil {
@@ -61,6 +88,7 @@ func (d *Database) UpdateHeatpumpState(state *heatpump.State) (*heatpump.State, 
 		if err != nil {
 			return nil, fmt.Errorf("error setting %s in database: %v", FanSpeedKey, err)
 		}
+		metrics.SetHeatpumpFanSpeed(fanSpeed)
 	}
 
 	return d.FetchHeatpumpState()
@@ -72,10 +100,14 @@ func (d *Database) UpdateTemperatureAndHumidity(temperature float64, humidity fl
 		return fmt.Errorf("error setting %s in database: %v", CurrentTemperatureKey, err)
 	}
 
+	metrics.SetHeatpumpCurrentTemperature(temperature)
+
 	err = d.Set(CurrentHumidityKey, fmt.Sprintf("%.1f", humidity))
 	if err != nil {
 		return fmt.Errorf("error setting %s in database: %v", CurrentHumidityKey, err)
 	}
+
+	metrics.SetHeatpumpCurrentHumidity(humidity)
 
 	return nil
 }

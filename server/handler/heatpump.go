@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/alexchebotarsky/heatpump-api/heatpump"
+	"github.com/alexchebotarsky/heatpump-api/model/heatpump"
 )
 
 type HeatpumpStateFetcher interface {

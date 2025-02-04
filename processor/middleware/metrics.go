@@ -21,7 +21,7 @@ func Metrics(eventName string, next event.Handler) event.Handler {
 			status = "OK"
 		}
 
-		metrics.RecordEventProcessed(eventName, status)
+		metrics.AddEventProcessed(eventName, status)
 		metrics.ObserveEventDuration(eventName, duration)
 
 		return err
