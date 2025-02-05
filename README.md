@@ -7,8 +7,8 @@
   ```
   [Unit]
   Description=Heatpump API
-  After=network.target docker.service
-  Requires=docker.service
+  After=network.target docker.service monitoring.service mosquitto.service
+  Requires=docker.service monitoring.service mosquitto.service
 
   [Service]
   Type=simple

@@ -102,6 +102,20 @@ func (d *Database) GetInt(key string) (int, error) {
 	return intValue, nil
 }
 
+func (d *Database) GetFloat(key string) (float64, error) {
+	value, ok := d.data[key]
+	if !ok {
+		return 0, fmt.Errorf("key %q not found in database", key)
+	}
+
+	floatValue, err := strconv.ParseFloat(value, 64)
+	if err != nil {
+		return 0, fmt.Errorf("error converting value %q to float64: %v", value, err)
+	}
+
+	return floatValue, nil
+}
+
 func (d *Database) Set(key, value string) error {
 	d.data[key] = value
 

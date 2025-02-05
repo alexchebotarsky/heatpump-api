@@ -27,6 +27,7 @@ type Clients struct {
 type Database interface {
 	handler.HeatpumpStateFetcher
 	handler.HeatpumpStateUpdater
+	handler.TemperatureAndHumidityFetcher
 }
 
 type PubSub interface {

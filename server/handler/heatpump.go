@@ -77,3 +77,26 @@ func UpdateHeatpumpState(updater HeatpumpStateUpdater, irTransmitter IRTransmitt
 		handleWritingErr(err)
 	}
 }
+
+type TemperatureAndHumidityFetcher interface {
+	FetchTemperatureAndHumidity() (temperature float64, humidity float64, err error)
+}
+
+func GetTemperatureAndHumidity(fetcher TemperatureAndHumidityFetcher) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		temperature, humidity, err := fetcher.FetchTemperatureAndHumidity()
+		if err != nil {
+			HandleError(w, fmt.Errorf("error fetching temperature and humidity: %v", err), http.StatusInternalServerError, true)
+			return
+		}
+
+		w.Header().Add("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+
+		err = json.NewEncoder(w).Encode(map[string]float64{
+			"temperature": temperature,
+			"humidity":    humidity,
+		})
+		handleWritingErr(err)
+	}
+}

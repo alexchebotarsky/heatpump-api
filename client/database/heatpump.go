@@ -43,20 +43,20 @@ func (d *Database) FetchHeatpumpState() (*heatpump.State, error) {
 
 	modeValue, err := d.GetStr(ModeKey)
 	if err != nil {
-		return nil, fmt.Errorf("error getting mode from database: %v", err)
+		return nil, fmt.Errorf("error getting %s from database: %v", ModeKey, err)
 	}
 	modeEnum := heatpump.Mode(modeValue)
 	s.Mode = &modeEnum
 
 	targetTemperature, err := d.GetInt(TargetTemperatureKey)
 	if err != nil {
-		return nil, fmt.Errorf("error getting target temperature from database: %v", err)
+		return nil, fmt.Errorf("error getting %s from database: %v", TargetTemperatureKey, err)
 	}
 	s.TargetTemperature = &targetTemperature
 
 	fanSpeed, err := d.GetInt(FanSpeedKey)
 	if err != nil {
-		return nil, fmt.Errorf("error getting fan speed from database: %v", err)
+		return nil, fmt.Errorf("error getting %s from database: %v", FanSpeedKey, err)
 	}
 	s.FanSpeed = &fanSpeed
 
@@ -92,6 +92,20 @@ func (d *Database) UpdateHeatpumpState(state *heatpump.State) (*heatpump.State, 
 	}
 
 	return d.FetchHeatpumpState()
+}
+
+func (d *Database) FetchTemperatureAndHumidity() (temperature float64, humidity float64, err error) {
+	temperature, err = d.GetFloat(CurrentTemperatureKey)
+	if err != nil {
+		return 0, 0, err
+	}
+
+	humidity, err = d.GetFloat(CurrentHumidityKey)
+	if err != nil {
+		return 0, 0, err
+	}
+
+	return temperature, humidity, nil
 }
 
 func (d *Database) UpdateTemperatureAndHumidity(temperature float64, humidity float64) error {
