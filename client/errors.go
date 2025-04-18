@@ -22,3 +22,15 @@ func (e *ErrMultiple) Error() string {
 func (e *ErrMultiple) Unwrap() error {
 	return errors.New(e.Error())
 }
+
+type ErrNotFound struct {
+	Err error
+}
+
+func (e *ErrNotFound) Error() string {
+	return e.Err.Error()
+}
+
+func (e *ErrNotFound) Unwrap() error {
+	return e.Err
+}

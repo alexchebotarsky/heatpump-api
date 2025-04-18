@@ -6,6 +6,8 @@ import (
 	"io"
 	"os"
 	"strconv"
+
+	"github.com/alexchebotarsky/heatpump-api/client"
 )
 
 type Database struct {
@@ -82,7 +84,7 @@ func (d *Database) Close() error {
 func (d *Database) GetStr(key string) (string, error) {
 	value, ok := d.data[key]
 	if !ok {
-		return "", fmt.Errorf("key %q not found in database", key)
+		return "", &client.ErrNotFound{Err: fmt.Errorf("key %q not found in database", key)}
 	}
 
 	return value, nil
@@ -91,7 +93,7 @@ func (d *Database) GetStr(key string) (string, error) {
 func (d *Database) GetInt(key string) (int, error) {
 	value, ok := d.data[key]
 	if !ok {
-		return 0, fmt.Errorf("key %q not found in database", key)
+		return 0, &client.ErrNotFound{Err: fmt.Errorf("key %q not found in database", key)}
 	}
 
 	intValue, err := strconv.Atoi(value)
@@ -105,7 +107,7 @@ func (d *Database) GetInt(key string) (int, error) {
 func (d *Database) GetFloat(key string) (float64, error) {
 	value, ok := d.data[key]
 	if !ok {
-		return 0, fmt.Errorf("key %q not found in database", key)
+		return 0, &client.ErrNotFound{Err: fmt.Errorf("key %q not found in database", key)}
 	}
 
 	floatValue, err := strconv.ParseFloat(value, 64)

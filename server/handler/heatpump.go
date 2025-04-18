@@ -4,8 +4,10 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 
+	"github.com/alexchebotarsky/heatpump-api/client"
 	"github.com/alexchebotarsky/heatpump-api/model/heatpump"
 )
 
@@ -86,8 +88,13 @@ func GetTemperatureAndHumidity(fetcher TemperatureAndHumidityFetcher) http.Handl
 	return func(w http.ResponseWriter, r *http.Request) {
 		temperature, humidity, err := fetcher.FetchTemperatureAndHumidity()
 		if err != nil {
-			HandleError(w, fmt.Errorf("error fetching temperature and humidity: %v", err), http.StatusInternalServerError, true)
-			return
+			switch err.(type) {
+			case *client.ErrNotFound:
+				log.Printf("Temperature and humidity not found: %v", err)
+			default:
+				HandleError(w, fmt.Errorf("error fetching temperature and humidity: %v", err), http.StatusInternalServerError, true)
+				return
+			}
 		}
 
 		w.Header().Add("Content-Type", "application/json")
