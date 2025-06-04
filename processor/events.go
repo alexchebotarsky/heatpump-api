@@ -10,7 +10,7 @@ func (p *Processor) setupEvents() {
 	p.use(middleware.Metrics)
 
 	p.handle(event.Event{
-		Topic:   "heatpump/dht-sensor",
-		Handler: handler.DHTSensor(p.Clients.Database),
+		Topic:   "heatpump/temperature-sensor",
+		Handler: handler.TemperatureSensor(p.Clients.Database),
 	})
 }

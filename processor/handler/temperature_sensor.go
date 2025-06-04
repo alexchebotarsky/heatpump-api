@@ -8,7 +8,7 @@ import (
 	"github.com/alexchebotarsky/heatpump-api/processor/event"
 )
 
-type SensorReading struct {
+type TemperatureReading struct {
 	Temperature float64 `json:"temperature"`
 	Humidity    float64 `json:"humidity"`
 }
@@ -17,12 +17,12 @@ type TemperatureAndHumidityUpdater interface {
 	UpdateTemperatureAndHumidity(temperature float64, humidity float64) error
 }
 
-func DHTSensor(updater TemperatureAndHumidityUpdater) event.Handler {
+func TemperatureSensor(updater TemperatureAndHumidityUpdater) event.Handler {
 	return func(ctx context.Context, payload []byte) error {
-		var reading SensorReading
+		var reading TemperatureReading
 		err := json.Unmarshal(payload, &reading)
 		if err != nil {
-			return fmt.Errorf("error unmarshalling dht reading: %v", err)
+			return fmt.Errorf("error unmarshalling temperature reading: %v", err)
 		}
 
 		err = updater.UpdateTemperatureAndHumidity(reading.Temperature, reading.Humidity)
