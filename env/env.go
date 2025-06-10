@@ -24,6 +24,7 @@ type Config struct {
 
 	PubSubHost string `env:"PUBSUB_HOST,default=localhost"`
 	PubSubPort uint16 `env:"PUBSUB_PORT,default=1883"`
+	PubSubQoS  byte   `env:"PUBSUB_QOS,default=1"`
 }
 
 func LoadConfig(ctx context.Context) (*Config, error) {

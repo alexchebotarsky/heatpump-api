@@ -11,15 +11,17 @@ import (
 )
 
 type PubSub struct {
+	qos           byte
 	subscriptions map[string]func(ctx context.Context, payload []byte) error
 
 	connManager *autopaho.ConnectionManager
 }
 
-func New(ctx context.Context, host string, port uint16) (*PubSub, error) {
+func New(ctx context.Context, host string, port uint16, qos byte) (*PubSub, error) {
 	var p PubSub
 	var err error
 
+	p.qos = qos
 	p.subscriptions = make(map[string]func(ctx context.Context, payload []byte) error)
 
 	brokerURL, err := url.Parse(fmt.Sprintf("mqtt://%s:%d", host, port))
@@ -65,7 +67,7 @@ func (p *PubSub) Publish(ctx context.Context, topic string, payload []byte) erro
 	_, err := p.connManager.Publish(ctx, &paho.Publish{
 		Topic:   topic,
 		Payload: payload,
-		QoS:     1,
+		QoS:     p.qos,
 	})
 	if err != nil {
 		return fmt.Errorf("error publishing message: %v", err)
@@ -79,7 +81,7 @@ func (p *PubSub) Subscribe(ctx context.Context, topic string, handler func(ctx c
 
 	_, err := p.connManager.Subscribe(ctx, &paho.Subscribe{
 		Subscriptions: []paho.SubscribeOptions{
-			{Topic: topic, QoS: 1},
+			{Topic: topic, QoS: p.qos},
 		},
 	})
 	if err != nil {
@@ -106,4 +108,4 @@ func (p *PubSub) handleConnectError(err error) {
 	slog.Error(fmt.Sprintf("error with pubsub connection: %s", err))
 }
 
-const clientID = "heatpump-api"
+const clientID = "thermofridge-api"
