@@ -11,16 +11,18 @@ import (
 )
 
 type PubSub struct {
+	clientID      string
 	qos           byte
 	subscriptions map[string]func(ctx context.Context, payload []byte) error
 
 	connManager *autopaho.ConnectionManager
 }
 
-func New(ctx context.Context, host string, port uint16, qos byte) (*PubSub, error) {
+func New(ctx context.Context, host string, port uint16, clientID string, qos byte) (*PubSub, error) {
 	var p PubSub
 	var err error
 
+	p.clientID = clientID
 	p.qos = qos
 	p.subscriptions = make(map[string]func(ctx context.Context, payload []byte) error)
 
@@ -34,7 +36,7 @@ func New(ctx context.Context, host string, port uint16, qos byte) (*PubSub, erro
 		SessionExpiryInterval: 10 * 60, // 10 minutes for reconnection
 		OnConnectError:        p.handleConnectError,
 		ClientConfig: paho.ClientConfig{
-			ClientID: clientID,
+			ClientID: p.clientID,
 			OnPublishReceived: []func(paho.PublishReceived) (bool, error){
 				p.handleMessage,
 			},
@@ -107,5 +109,3 @@ func (p *PubSub) handleMessage(message paho.PublishReceived) (bool, error) {
 func (p *PubSub) handleConnectError(err error) {
 	slog.Error(fmt.Sprintf("error with pubsub connection: %s", err))
 }
-
-const clientID = "thermofridge-api"

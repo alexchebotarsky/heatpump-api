@@ -22,9 +22,10 @@ type Config struct {
 	DefaultTargetTemperature int    `env:"DEFAULT_TARGET_TEMPERATURE,default=22"`
 	DefaultFanSpeed          int    `env:"DEFAULT_FAN_SPEED,default=0"`
 
-	PubSubHost string `env:"PUBSUB_HOST,default=localhost"`
-	PubSubPort uint16 `env:"PUBSUB_PORT,default=1883"`
-	PubSubQoS  byte   `env:"PUBSUB_QOS,default=1"`
+	PubSubHost     string `env:"PUBSUB_HOST,default=localhost"`
+	PubSubPort     uint16 `env:"PUBSUB_PORT,default=1883"`
+	PubSubClientID string `env:"PUBSUB_CLIENT_ID,default=heatpump-api"`
+	PubSubQoS      byte   `env:"PUBSUB_QOS,default=1"`
 }
 
 func LoadConfig(ctx context.Context) (*Config, error) {

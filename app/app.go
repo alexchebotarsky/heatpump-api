@@ -120,7 +120,7 @@ func setupClients(ctx context.Context, env *env.Config) (*Clients, error) {
 		return nil, fmt.Errorf("error creating new database client: %v", err)
 	}
 
-	c.PubSub, err = pubsub.New(ctx, env.PubSubHost, env.PubSubPort, env.PubSubQoS)
+	c.PubSub, err = pubsub.New(ctx, env.PubSubHost, env.PubSubPort, env.PubSubClientID, env.PubSubQoS)
 	if err != nil {
 		return nil, fmt.Errorf("error creating new pubsub client: %v", err)
 	}
