@@ -4,10 +4,8 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"log"
 	"net/http"
 
-	"github.com/alexchebotarsky/heatpump-api/client"
 	"github.com/alexchebotarsky/heatpump-api/model/heatpump"
 )
 
@@ -68,7 +66,7 @@ func UpdateHeatpumpState(updater HeatpumpStateUpdater, irTransmitter IRTransmitt
 
 		err = irTransmitter.TransmitIRSignal(r.Context(), binaryString)
 		if err != nil {
-			HandleError(w, fmt.Errorf("error notifying heatpump state: %v", err), http.StatusInternalServerError, true)
+			HandleError(w, fmt.Errorf("error publishing binary heatpump state: %v", err), http.StatusInternalServerError, true)
 			return
 		}
 
@@ -76,34 +74,6 @@ func UpdateHeatpumpState(updater HeatpumpStateUpdater, irTransmitter IRTransmitt
 		w.WriteHeader(http.StatusOK)
 
 		err = json.NewEncoder(w).Encode(updatedState)
-		handleWritingErr(err)
-	}
-}
-
-type TemperatureAndHumidityFetcher interface {
-	FetchTemperatureAndHumidity() (temperature float64, humidity float64, err error)
-}
-
-func GetTemperatureAndHumidity(fetcher TemperatureAndHumidityFetcher) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		temperature, humidity, err := fetcher.FetchTemperatureAndHumidity()
-		if err != nil {
-			switch err.(type) {
-			case *client.ErrNotFound:
-				log.Printf("Temperature and humidity not found: %v", err)
-			default:
-				HandleError(w, fmt.Errorf("error fetching temperature and humidity: %v", err), http.StatusInternalServerError, true)
-				return
-			}
-		}
-
-		w.Header().Add("Content-Type", "application/json")
-		w.WriteHeader(http.StatusOK)
-
-		err = json.NewEncoder(w).Encode(map[string]float64{
-			"temperature": temperature,
-			"humidity":    humidity,
-		})
 		handleWritingErr(err)
 	}
 }

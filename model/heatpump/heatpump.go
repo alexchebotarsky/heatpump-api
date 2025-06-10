@@ -176,6 +176,11 @@ func NewStateFromBinary(binary string) (*State, error) {
 	return &s, nil
 }
 
+type TemperatureReading struct {
+	Temperature float64 `json:"temperature"`
+	Humidity    float64 `json:"humidity"`
+}
+
 type Mode string
 
 const (
