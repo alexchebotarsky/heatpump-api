@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log/slog"
 	"os"
+	"os/signal"
 
 	"github.com/alexchebotarsky/heatpump-api/app"
 	"github.com/alexchebotarsky/heatpump-api/env"
@@ -13,7 +14,8 @@ import (
 )
 
 func main() {
-	ctx := context.Background()
+	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt, os.Kill)
+	defer cancel()
 
 	env, err := env.LoadConfig(ctx)
 	if err != nil {
